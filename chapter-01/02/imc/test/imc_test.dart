@@ -2,6 +2,11 @@ import 'package:imc/imc.dart';
 import 'package:test/test.dart';
 
 void main() {
+  setUp(() => null); // before test run
+  tearDown(() => null); // after test run
+  setUpAll(() => null); // before switch
+  tearDownAll(() => null); // after switch
+
   test('Should calculate IMC', () {
     final result = calcIMC(1.83, 76.0);
 
