@@ -8,11 +8,13 @@ void main() {
     expect(result, equals(22.694018931589476));
   });
 
-  test('Should throw Exception when height is less than 1', () {
-    expect(() => calcIMC(0, 80), throwsA(isA<Exception>()));
-  });
+  group('Exceptions', () {
+    test('Should throw Exception when height is less than 1', () {
+      expect(() => calcIMC(0, 80), throwsA(isA<Exception>()));
+    });
 
-  test('Should throw Exception when weight is less than 1', () {
-    expect(() => calcIMC(1.80, 0), throwsA(isA<Exception>()));
+    test('Should throw Exception when weight is less than 1', () {
+      expect(() => calcIMC(1.80, 0), throwsA(isA<Exception>()));
+    });
   });
 }
