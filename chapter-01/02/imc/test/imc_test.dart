@@ -8,8 +8,14 @@ void main() {
   tearDownAll(() => null); // after switch
 
   test('Should calculate IMC', () {
-    final result = calcIMC(1.83, 76.0);
+    /// arrange
+    final height = 1.83;
+    final weight = 76.0;
 
+    /// act
+    final result = calcIMC(height, weight);
+
+    /// assert
     expect(result, equals(22.694018931589476));
   });
 
