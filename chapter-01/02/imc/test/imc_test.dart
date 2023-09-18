@@ -17,6 +17,9 @@ void main() {
 
     /// assert
     expect(result, equals(22.694018931589476));
+    // expect(result, isA<double>());
+    // expect(result, greaterThan(20));
+    // expect(result, isPositive);
   });
 
   group('Exceptions', () {
