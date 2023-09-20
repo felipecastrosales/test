@@ -8,7 +8,7 @@ class ApiService {
 
   final Uno _uno;
 
-  Future<List<Product>> getProducts() async {
+  Future<List<Product>> get products async {
     try {
       final response = await _uno.get('/product');
       final list = response.data as List;
