@@ -1,49 +1,21 @@
-import 'dart:async';
-
 import 'package:api/api_service.dart';
 import 'package:api/product.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
 import 'package:uno/uno.dart';
 
-class MockUno implements Uno {
-  final bool withError;
+class MockUno extends Mock implements Uno {}
 
-  MockUno({this.withError = false});
-
-  @override
-  Future<Response> get(
-    String url, {
-    Duration? timeout,
-    Map<String, String> params = const {},
-    Map<String, String> headers = const {},
-    ResponseType responseType = ResponseType.json,
-    DownloadCallback? onDownloadProgress,
-    ValidateCallback? validateStatus,
-  }) async {
-    if (withError) {
-      throw UnoError('error');
-    }
-
-    return Response(
-      data: productListJson,
-      status: 200,
-      headers: headers,
-      request: Request(
-        uri: Uri.base,
-        method: '',
-        headers: {},
-        timeout: Duration.zero,
-      ),
-    );
-  }
-
-  @override
-  noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
-}
+class MockResponse extends Mock implements Response {}
 
 void main() {
   test('Should return data from products getter', () async {
     final uno = MockUno();
+    final response = MockResponse();
+
+    when(() => response.data).thenReturn(productListJson);
+    when(() => uno.get(any())).thenAnswer((_) async => response);
+
     final future = ApiService(uno: uno).products;
 
     expect(future, completes);
@@ -58,7 +30,11 @@ void main() {
 
   test('Should return empty list from products getter when has error',
       () async {
-    final uno = MockUno(withError: true);
+    final uno = MockUno();
+    final response = MockResponse();
+    when(() => response.data).thenReturn(productListJson);
+    when(() => uno.get(any())).thenThrow(UnoError('error'));
+
     final future = ApiService(uno: uno).products;
 
     expect(future, completes);
