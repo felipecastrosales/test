@@ -9,8 +9,13 @@ class MockUno extends Mock implements Uno {}
 class MockResponse extends Mock implements Response {}
 
 void main() {
+  final uno = MockUno();
+
+  tearDown(() {
+    reset(uno);
+  });
+
   test('Should return data from products getter', () async {
-    final uno = MockUno();
     final response = MockResponse();
 
     when(() => response.data).thenReturn(productListJson);
@@ -30,7 +35,6 @@ void main() {
 
   test('Should return empty list from products getter when has error',
       () async {
-    final uno = MockUno();
     final response = MockResponse();
     when(() => response.data).thenReturn(productListJson);
     when(() => uno.get(any())).thenThrow(UnoError('error'));
