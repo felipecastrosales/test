@@ -7,7 +7,7 @@ import 'package:todo/states/board_state.dart';
 
 class MockBoardRepository extends Mock implements BoardRepository {}
 
-const tTask = Task(id: 7, description: 'Felipe', check: true);
+const tTask = Task(id: 7, description: 'Felipe');
 
 void main() {
   final repository = MockBoardRepository();
@@ -44,6 +44,41 @@ void main() {
       );
 
       await cubit.fetchTasks();
+    });
+
+    group('addTasks |', () {
+      testWidgets('Should add task', (tester) async {
+        when(() => repository.update(tasks: [tTask]))
+            .thenAnswer((_) async => [tTask]);
+
+        expect(
+          cubit.stream,
+          emitsInOrder([
+            isA<GettedTasksBoardState>(),
+          ]),
+        );
+
+        await cubit.addTask(tTask);
+        final state = cubit.state as GettedTasksBoardState;
+
+        expect(state.tasks.length, 1);
+        expect(state.tasks, [tTask]);
+      });
+
+      testWidgets('Should return error when fail', (tester) async {
+        when(() => repository.update(tasks: [tTask]))
+            .thenThrow(Exception('Error'));
+
+        expect(
+          cubit.stream,
+          emitsInOrder([
+            isA<LoadingBoardState>(),
+            isA<FailureBoardState>(),
+          ]),
+        );
+
+        await cubit.fetchTasks();
+      });
     });
   });
 }

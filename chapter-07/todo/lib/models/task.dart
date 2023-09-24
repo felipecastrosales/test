@@ -4,24 +4,24 @@ class Task extends Equatable {
   const Task({
     required this.id,
     required this.description,
-    required this.check,
+    this.isChecked = false,
   });
 
   final int id;
   final String description;
-  final bool check;
+  final bool isChecked;
 
   @override
-  List<Object?> get props => [id, description, check];
+  List<Object?> get props => [id, description, isChecked];
 
   Task copyWith({
     int? id,
     String? description,
-    bool? check,
+    bool? isChecked,
   }) =>
       Task(
         id: id ?? this.id,
         description: description ?? this.description,
-        check: check ?? this.check,
+        isChecked: isChecked ?? this.isChecked,
       );
 }
