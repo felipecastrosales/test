@@ -23,50 +23,47 @@ class BoardCubit extends Cubit<BoardState> {
   }
 
   Future<void> addTask(Task newTask) async {
-    final state = this.state;
-
-    if (state is! GettedTasksBoardState) {
+    final tasks = _getTasks();
+    if (tasks == null) {
       return;
     }
 
-    try {
-      final tasks = state.tasks.toList();
-      tasks.add(newTask);
-      await _repository.update(tasks: tasks);
-      emit(GettedTasksBoardState(tasks: tasks));
-    } catch (e) {
-      emit(FailureBoardState(message: 'Error'));
-    }
+    tasks.add(newTask);
+    await emitTasks(tasks);
   }
 
   Future<void> removeTask(Task newTask) async {
-    final state = this.state;
-
-    if (state is! GettedTasksBoardState) {
+    final tasks = _getTasks();
+    if (tasks == null) {
       return;
     }
 
-    try {
-      final tasks = state.tasks.toList();
-      tasks.remove(newTask);
-      await _repository.update(tasks: tasks);
-      emit(GettedTasksBoardState(tasks: tasks));
-    } catch (e) {
-      emit(FailureBoardState(message: 'Error'));
-    }
+    tasks.remove(newTask);
+    await emitTasks(tasks);
   }
 
   Future<void> checkTask(Task newTask) async {
-    final state = this.state;
-
-    if (state is! GettedTasksBoardState) {
+    final tasks = _getTasks();
+    if (tasks == null) {
       return;
     }
 
+    final index = tasks.indexOf(newTask);
+    tasks[index] = newTask.copyWith(isChecked: !newTask.isChecked);
+    await emitTasks(tasks);
+  }
+
+  List<Task>? _getTasks() {
+    final state = this.state;
+    if (state is! GettedTasksBoardState) {
+      return null;
+    }
+
+    return state.tasks.toList();
+  }
+
+  Future<void> emitTasks(List<Task> tasks) async {
     try {
-      final tasks = state.tasks.toList();
-      final index = tasks.indexOf(newTask);
-      tasks[index] = newTask.copyWith(isChecked: !newTask.isChecked);
       await _repository.update(tasks: tasks);
       emit(GettedTasksBoardState(tasks: tasks));
     } catch (e) {
