@@ -10,8 +10,13 @@ class MockBoardRepository extends Mock implements BoardRepository {}
 const tTask = Task(id: 7, description: 'Felipe');
 
 void main() {
-  final repository = MockBoardRepository();
-  final cubit = BoardCubit(repository: repository);
+  late MockBoardRepository repository;
+  late BoardCubit cubit;
+
+  setUp(() {
+    repository = MockBoardRepository();
+    cubit = BoardCubit(repository: repository);
+  });
 
   tearDown(() {
     reset(repository);
@@ -45,40 +50,119 @@ void main() {
 
       await cubit.fetchTasks();
     });
+  });
 
-    group('addTasks |', () {
-      testWidgets('Should add task', (tester) async {
-        when(() => repository.update(tasks: [tTask]))
-            .thenAnswer((_) async => [tTask]);
+  group('addTasks |', () {
+    testWidgets('Should add task', (tester) async {
+      when(() => repository.update(tasks: [tTask]))
+          .thenAnswer((_) async => [tTask]);
 
-        expect(
-          cubit.stream,
-          emitsInOrder([
-            isA<GettedTasksBoardState>(),
-          ]),
-        );
+      expect(
+        cubit.stream,
+        emitsInOrder([
+          isA<GettedTasksBoardState>(),
+        ]),
+      );
 
-        await cubit.addTask(tTask);
-        final state = cubit.state as GettedTasksBoardState;
+      await cubit.addTask(tTask);
+      final state = cubit.state as GettedTasksBoardState;
 
-        expect(state.tasks.length, 1);
-        expect(state.tasks, [tTask]);
-      });
+      expect(state.tasks.length, 1);
+      expect(state.tasks, [tTask]);
+    });
 
-      testWidgets('Should return error when fail', (tester) async {
-        when(() => repository.update(tasks: [tTask]))
-            .thenThrow(Exception('Error'));
+    testWidgets('Should return error when fail', (tester) async {
+      when(() => repository.update(tasks: [tTask]))
+          .thenThrow(Exception('Error'));
 
-        expect(
-          cubit.stream,
-          emitsInOrder([
-            isA<LoadingBoardState>(),
-            isA<FailureBoardState>(),
-          ]),
-        );
+      expect(
+        cubit.stream,
+        emitsInOrder([
+          isA<FailureBoardState>(),
+        ]),
+      );
 
-        await cubit.fetchTasks();
-      });
+      await cubit.addTask(tTask);
+    });
+  });
+
+  group('removeTask |', () {
+    testWidgets('Should remove an task', (tester) async {
+      when(() => repository.update(tasks: any(named: 'tasks')))
+          .thenAnswer((_) async => []);
+
+      cubit.addTasks(tasks: [tTask]);
+      expect((cubit.state as GettedTasksBoardState).tasks.length, 1);
+
+      expect(
+        cubit.stream,
+        emitsInOrder([
+          isA<GettedTasksBoardState>(),
+        ]),
+      );
+
+      await cubit.removeTask(tTask);
+      final state = cubit.state as GettedTasksBoardState;
+      expect(state.tasks.length, 0);
+    });
+
+    testWidgets('Should return error when fail', (tester) async {
+      when(() => repository.update(tasks: any(named: 'tasks')))
+          .thenThrow(Exception('Error'));
+
+      cubit.addTasks(tasks: [tTask]);
+
+      expect(
+        cubit.stream,
+        emitsInOrder([
+          isA<FailureBoardState>(),
+        ]),
+      );
+
+      await cubit.removeTask(tTask);
+    });
+  });
+
+  group('checkTask |', () {
+    test('Should check an task', () async {
+      when(() => repository.update(tasks: any(named: 'tasks')))
+          .thenAnswer((_) async => []);
+
+      cubit.addTasks(tasks: [tTask]);
+
+      expect((cubit.state as GettedTasksBoardState).tasks.length, 1);
+      expect(
+        (cubit.state as GettedTasksBoardState).tasks.first.isChecked,
+        false,
+      );
+
+      expect(
+        cubit.stream,
+        emitsInOrder([
+          isA<GettedTasksBoardState>(),
+        ]),
+      );
+
+      await cubit.checkTask(tTask);
+      final state = cubit.state as GettedTasksBoardState;
+      expect(state.tasks.length, 1);
+      expect(state.tasks.first.isChecked, true);
+    });
+
+    test('Should throw exception when have error', () async {
+      when(() => repository.update(tasks: any(named: 'tasks')))
+          .thenThrow(Exception('Error'));
+
+      cubit.addTasks(tasks: [tTask]);
+
+      expect(
+        cubit.stream,
+        emitsInOrder(
+          [isA<FailureBoardState>()],
+        ),
+      );
+
+      await cubit.checkTask(tTask);
     });
   });
 }
